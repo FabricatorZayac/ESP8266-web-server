@@ -1,12 +1,22 @@
 <!-- HTML_HELPER String css = TO_STRING(
-
-html {
-    font-family: Helvetica;
-    display: inline-block;
-    margin: 0px auto; text-align: center;
+html,
+body {
+    height: 100%;
+    margin: 0;
 }
-.button {
-    background-color: #195B6A;
+body {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    background: linear-gradient(to bottom, #009a5b, #AAA);
+
+    font-size: 1.5rem;
+}
+h1 {
+    font-size: 4rem;
+}
+button {
+    background-color: #193B6A;
     border: none;
     color: white;
     padding: 16px 40px;
@@ -14,9 +24,13 @@ html {
     font-size: 30px;
     margin: 2px;
     cursor: pointer;
+    border-radius: .5rem;
 }
 .button2 {
     background-color: #77878A;
+}
+.biglink {
+    font-size: 2rem;
 }
 
 <!-- );
