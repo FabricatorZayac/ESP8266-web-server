@@ -1,23 +1,23 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 
-#include "wifi_connect.h"
+#include "wifi_connect.hpp"
 
 // clang-format off
 // HTML stuffs
-#include "html_begin.pp"
+#include "html_begin.hpp"
 #include "index.html"
 
-#include "html_begin.pp"
+#include "html_begin.hpp"
 #include "index.css"
 
-#include "html_begin.pp"
+#include "html_begin.hpp"
 #include "script.js"
 
-#include "html_begin.pp"
+#include "html_begin.hpp"
 #include "404.html"
 
-#include "html_end.pp"
+#include "html_end.hpp"
 //clang-format
 
 ESP8266WebServer server(80);
