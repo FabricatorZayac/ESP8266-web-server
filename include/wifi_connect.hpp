@@ -2,15 +2,19 @@
 #define WIFI_CONNECT_H_
 
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+
+ESP8266WiFiMulti wifiMulti;
 
 void wifi_connect(const char *ssid, const char *pass) {
     Serial.println('\n');
-    WiFi.begin(ssid, pass);
+    wifiMulti.addAP(ssid, pass);
+
     Serial.print("Connecting to ");
     Serial.print(ssid); Serial.println(" ...");
 
     int i = 0;
-    while (WiFi.status() != WL_CONNECTED) {
+    while (wifiMulti.run() != WL_CONNECTED) {
         delay(1000);
         Serial.print(++i); Serial.print('.');
     }

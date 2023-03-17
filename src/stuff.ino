@@ -1,5 +1,6 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 
 #include "wifi_connect.hpp"
 #include "html_embed.hpp"
@@ -21,13 +22,19 @@ ESP8266WebServer server(80);
 #define LED 2
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(115200);
     wifi_connect(
 #include "wifi.conf"
     );
 
     pinMode(LED, OUTPUT);
     digitalWrite(LED, LOW);
+
+    if (!MDNS.begin("esp8266")) {
+        Serial.println("Error setting up MDNS responder!");
+    }
+    Serial.println("mDNS responder started");
+    MDNS.addService("http", "tcp", 80);
 
     server.enableCORS(true);
 
@@ -49,12 +56,19 @@ void setup() {
         server.send(200, "text/javascript", script_js);
     });
 
-    server.on("/led", HTTP_POST, [](){
-        digitalWrite(LED, !digitalRead(LED));
+    server.on("/led", HTTP_GET, [](){
         String res = String("{\"led_state\":")
                    + String(digitalRead(LED) ? "false" : "true")
                    + "}";
         server.send(200, "application/json", res);
+    });
+
+    server.on("/led", HTTP_POST, [](){
+        String body = server.arg("plain");
+        Serial.println(body);
+        if (body == "on") digitalWrite(LED, LOW);
+        if (body == "off") digitalWrite(LED, HIGH);
+        server.send(200);
     });
 
     server.onNotFound([](){
@@ -64,5 +78,6 @@ void setup() {
 }
 
 void loop(){
+    MDNS.update();
     server.handleClient();
 }
