@@ -2,41 +2,37 @@
 #include <ESP8266WiFi.h>
 
 #include "wifi_connect.hpp"
+#include "html_embed.hpp"
 
-// clang-format off
-// HTML stuffs
-#include "html_begin.hpp"
-#include "index.html"
-
-#include "html_begin.hpp"
-#include "index.css"
-
-#include "html_begin.hpp"
+EMBED_FILE
 #include "script.js"
 
-#include "html_begin.hpp"
-#include "404.html"
+EMBED_FILE
+#include "index.css"
 
-#include "html_end.hpp"
-//clang-format
+EMBED_FILE
+#include "index.html"
+
+EMBED_FILE
+#include "not_found.html"
 
 ESP8266WebServer server(80);
+
+#define LED 2
 
 void setup() {
     Serial.begin(9600);
     wifi_connect(
 #include "wifi.conf"
-            );
+    );
 
-    html_page.replace("$(STYLE)", css);
-    not_found_page.replace("$(STYLE)", css);
-    html_page.replace("$(MAIN_SCRIPT)", main_js);
-    html_page.replace("$(LOCAL_IP)", WiFi.localIP().toString());
+    pinMode(LED, OUTPUT);
+    digitalWrite(LED, LOW);
 
     server.enableCORS(true);
 
     server.on("/", HTTP_GET, [](){
-        server.send(200, "text/html", html_page);
+        server.send(200, "text/html", index_html);
     });
 
     server.on("/hi", HTTP_GET, [](){
@@ -45,8 +41,24 @@ void setup() {
                     "{\"message\": \"Hello world!\"}");
     });
 
+    server.on("/index.css", HTTP_GET, [](){
+        server.send(200, "text/css", index_css);
+    });
+
+    server.on("/script.js", HTTP_GET, [](){
+        server.send(200, "text/javascript", script_js);
+    });
+
+    server.on("/led", HTTP_POST, [](){
+        digitalWrite(LED, !digitalRead(LED));
+        String res = String("{\"led_state\":")
+                   + String(digitalRead(LED) ? "false" : "true")
+                   + "}";
+        server.send(200, "application/json", res);
+    });
+
     server.onNotFound([](){
-        server.send(404, "text/html", not_found_page);
+        server.send(404, "text/html", not_found_html);
     });
     server.begin();
 }

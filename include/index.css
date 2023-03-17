@@ -1,4 +1,5 @@
-<!-- HTML_HELPER String css = TO_STRING(
+<!-- HTML_HELPER const PROGMEM char index_css[] = TO_STRING(
+
 html,
 body {
     height: 100%;
