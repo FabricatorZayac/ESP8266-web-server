@@ -1,5 +1,3 @@
-<!-- HTML_HELPER const PROGMEM char script_js[] = TO_STRING(
-
 let fnuuy = document.getElementById("fnuuy");
 let hi = document.getElementById("hi");
 let led = document.getElementById("led_button");
@@ -43,5 +41,3 @@ led.onclick = async () => {
   });
   setLedButton();
 };
-
-<!-- );

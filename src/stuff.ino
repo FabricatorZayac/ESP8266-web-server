@@ -1,23 +1,36 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
+#include <LittleFS.h>
 
 #include "wifi_connect.hpp"
-#include "html_embed.hpp"
 
-EMBED_FILE
-#include "script.js"
+struct MyServer : public ESP8266WebServer {
+    MyServer(int port) : ESP8266WebServer(port) {};
+    void sendFile(String content_type, String path) {
+        File file = LittleFS.open(path, "r");
+        this->streamFile(file, content_type);
+        file.close();
+    }
+};
 
-EMBED_FILE
-#include "index.css"
+String getContentType(String filename){
+    if(filename.endsWith(".htm")) return "text/html";
+    else if(filename.endsWith(".html")) return "text/html";
+    else if(filename.endsWith(".css")) return "text/css";
+    else if(filename.endsWith(".js")) return "text/javascript";
+    else if(filename.endsWith(".png")) return "image/png";
+    else if(filename.endsWith(".gif")) return "image/gif";
+    else if(filename.endsWith(".jpg")) return "image/jpeg";
+    else if(filename.endsWith(".ico")) return "image/x-icon";
+    else if(filename.endsWith(".xml")) return "text/xml";
+    else if(filename.endsWith(".pdf")) return "application/x-pdf";
+    else if(filename.endsWith(".zip")) return "application/x-zip";
+    else if(filename.endsWith(".gz")) return "application/x-gzip";
+    return "text/plain";
+}
 
-EMBED_FILE
-#include "index.html"
-
-EMBED_FILE
-#include "not_found.html"
-
-ESP8266WebServer server(80);
+MyServer server(80);
 
 #define LED 2
 
@@ -37,23 +50,12 @@ void setup() {
     MDNS.addService("http", "tcp", 80);
 
     server.enableCORS(true);
-
-    server.on("/", HTTP_GET, [](){
-        server.send(200, "text/html", index_html);
-    });
+    LittleFS.begin();
 
     server.on("/hi", HTTP_GET, [](){
         server.send(200,
                     "application/json",
                     "{\"message\": \"Hello world!\"}");
-    });
-
-    server.on("/index.css", HTTP_GET, [](){
-        server.send(200, "text/css", index_css);
-    });
-
-    server.on("/script.js", HTTP_GET, [](){
-        server.send(200, "text/javascript", script_js);
     });
 
     server.on("/led", HTTP_GET, [](){
@@ -72,7 +74,12 @@ void setup() {
     });
 
     server.onNotFound([](){
-        server.send(404, "text/html", not_found_html);
+        String path = server.uri();
+        if (path == "/") path += "index.html";
+        if (LittleFS.exists(path)) {
+            server.sendFile(getContentType(path), path);
+        }
+        server.sendFile("text/html", "/not_found.html");
     });
     server.begin();
 }
